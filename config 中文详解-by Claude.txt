@@ -1,0 +1,160 @@
+# Freqtrade配置文件详解
+
+## 基础交易设置
+
+### `max_open_trades: 4`
+最大同时开仓数量，限制机器人最多同时持有4个交易对。
+
+### `stake_currency: "USDT"`
+基础货币，所有交易都用USDT作为计价货币。
+
+### `stake_amount: "unlimited"`
+每笔交易的投入金额设为无限制，会根据可用资金和最大开仓数自动分配。
+
+### `tradable_balance_ratio: 0.99`
+可交易资金比例，使用99%的可用余额进行交易，保留1%作为缓冲。
+
+### `available_capital: 1000`
+可用资金总额为1000 USDT。
+
+### `amend_last_stake_amount: true`
+允许调整最后一笔交易的投入金额，确保充分利用可用资金。
+
+### `fiat_display_currency: "USD"`
+显示货币设为美元，用于报告和通知中的价值显示。
+
+### `timeframe: "5m"`
+交易时间框架为5分钟K线图。
+
+### `dry_run: false`
+实盘交易模式（非模拟交易）。
+
+## 订单管理
+
+### `cancel_open_orders_on_exit: false`
+退出时不自动取消未成交订单。
+
+### `forcebuy_enable: true`
+允许强制买入功能。
+
+### `unfilledtimeout`
+未成交订单超时设置：
+- 买单15分钟后取消
+- 卖单30分钟后取消
+
+### `order_types`
+所有订单类型都设为市价单（market），包括：
+- 买入、卖出、强制买卖、紧急卖出等
+- `stoploss_on_exchange: false` - 止损单不放在交易所
+
+## 买卖策略
+
+### `bid_strategy`（买入策略）
+- `price_side: "ask"` - 基于卖方价格
+- `ask_last_balance: 0.0` - 不使用最后成交价平衡
+- `use_order_book: false` - 不使用订单簿
+
+### `ask_strategy`（卖出策略）
+- `price_side: "bid"` - 基于买方价格
+- 同样不使用订单簿
+
+## 交易所设置
+
+### `exchange`
+- 使用KuCoin交易所
+- API密钥需要自行配置
+- 限速设置为220毫秒/次请求
+
+### `pair_whitelist: []`
+白名单为空，表示使用动态选币。
+
+### `pair_blacklist`
+黑名单排除了：
+- 杠杆代币 (3L, 3S)
+- 法币交易对
+- 稳定币交易对
+- 粉丝代币
+- 特定项目代币
+
+## 动态选币设置 (`pairlists`)
+
+### 1. `VolumePairList`
+按成交量选择前100个交易对。
+
+### 2. `AgeFilter`
+只选择上市14天以上的币种。
+
+### 3. `SpreadFilter`
+买卖价差不超过0.6%的交易对。
+
+### 4. `RangeStabilityFilter`
+过去3天价格变化率至少5%的币种。
+
+### 5. `VolatilityFilter`
+波动率在2%-75%之间的币种。
+
+### 6. 再次`VolumePairList`
+进一步筛选到80个交易对。
+
+### 7. `ShuffleFilter`
+随机打乱顺序，避免总是交易相同币种。
+
+## 边缘优化 (`edge`)
+目前禁用，如启用可用于：
+- 风险控制
+- 止损优化
+- 最小胜率和期望值设置
+
+## 通知设置 (`telegram`)
+
+### 基础配置
+- 启用Telegram通知
+- 需要配置Token和Chat ID
+
+### 键盘按钮
+提供快捷命令按钮：
+- 利润、余额、状态查询
+- 性能分析、日志查看
+- 配置管理等
+
+### 通知级别
+- 大部分通知设为静默
+- 只有警告信息正常通知
+
+## API服务器 (`api_server`)
+目前禁用，可用于：
+- Web界面访问
+- 第三方工具集成
+- 远程监控
+
+## 其他设置
+
+### `bot_name: "freqtrade"`
+机器人名称。
+
+### `initial_state: "running"`
+启动后立即开始运行。
+
+### `internals`
+- `process_throttle_secs: 5` - 每5秒检查一次市场
+
+## 注释部分
+```
+// "db_url": 数据库路径
+// "strategy": 交易策略名称
+// "strategy_path": 策略文件路径
+```
+
+## 重要提醒
+
+⚠️ **风险警告**：
+- 这是实盘交易配置（`dry_run: false`）
+- 需要配置真实的API密钥
+- 建议先在模拟环境测试
+- 加密货币交易存在巨大风险
+
+📝 **配置建议**：
+- 根据个人风险承受能力调整`max_open_trades`
+- 设置合适的`available_capital`
+- 选择适合的交易策略
+- 定期监控和调整参数
